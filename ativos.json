@@ -1,0 +1,29 @@
+[
+    {
+        "Id": 1,
+        "Hostname": "a",
+        "Responsavel": "a",
+        "Setor": "a",
+        "Tipo": "SOFTWARE",
+        "Vulnerabilidades": [
+            {
+                "nome": "senha fraca",
+                "dificuldade": "Média",
+                "status": "Aberta"
+            },
+            {
+                "nome": "lento",
+                "dificuldade": "Alta",
+                "status": "Resolvida"
+            }
+        ]
+    },
+    {
+        "Id": 2,
+        "Hostname": "s",
+        "Responsavel": "s",
+        "Setor": "s",
+        "Tipo": "SERVIDOR",
+        "Vulnerabilidades": []
+    }
+]
