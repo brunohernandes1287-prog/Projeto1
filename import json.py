@@ -106,7 +106,12 @@ def salvar_json():
     with open(ARQUIVO, "w", encoding="utf-8") as arquivo:
         json.dump(dados, arquivo, indent=4, ensure_ascii=False)
  
- 
+def _reindexar():
+    indice_id.clear()
+    indice_hostname.clear()
+    for a in lista:
+        _indexar(a)
+
 def carregar_json():
     if not os.path.exists(ARQUIVO):
         return []
@@ -157,16 +162,23 @@ def escolher_tipo():
     print("1 - Notebook")
     print("2 - Servidor")
     print("3 - Roteador")
-    print("4 - Software")
- 
+    print("4 - Software")  
+    print("5 - APLICACAO_WEB")   
+    print("6 - BANCO_DE_DADOS")  
+    print("7 - IMPRESSORA")     
+    print("8 - ESTACAO_TRABALHO") 
     while True:
         try:
             codigo = int(input("\nEscolha o tipo: "))
             return TipoAtivo(codigo)
         except ValueError:
             print("⚠️ Digite um número válido.")
+            time.sleep(2)
+            os.system("cls" if os.name == "nt" else "clear")
         except Exception:
             print("⚠️ Escolha um tipo existente.")
+            time.sleep(2)
+            os.system("cls" if os.name == "nt" else "clear")
  
  
 def escolher_dificuldade():
@@ -183,8 +195,18 @@ def escolher_dificuldade():
         if escolha in opcoes:
             return opcoes[escolha]
         print("⚠️ Escolha uma opção válida.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
  
- 
+def input_obrigatorio(campo):
+    while True:
+        valor = input(f"{campo}: ").strip()
+        if valor:
+            return valor
+        print(f"⚠️ {campo} não pode ser vazio.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
+
 def cadastrar_ativo():
     os.system("cls" if os.name == "nt" else "clear")
  
@@ -194,16 +216,22 @@ def cadastrar_ativo():
  
     id_novo = max([ativo.id for ativo in lista], default=0) + 1
  
-    hostname = input("Hostname: ")
-    responsavel = input("Responsavel: ")
-    setor = input("Setor: ")
+    hostname    = input_obrigatorio("Hostname")
+    responsavel = input_obrigatorio("Responsavel")
+    setor       = input_obrigatorio("Setor")
+
+    if hostname.lower() in indice_hostname:
+            print(f"\n⚠️ Já existe um ativo com o hostname '{hostname}'.")
+            time.sleep(2)
+            return
     tipo = escolher_tipo()
  
     ativo = Ativo(id_novo, hostname, responsavel, setor, tipo, [])
  
     lista.append(ativo)
+    _indexar(ativo)   
     salvar_json()
-    
+    os.system("cls" if os.name == "nt" else "clear")
     escolha = input("""Deseja adicionar vulnerabilidade S/N
                     """)
     if escolha.lower() == 's':
@@ -212,18 +240,28 @@ def cadastrar_ativo():
          print(f"\n✅ Ativo '{hostname}' cadastrado com sucesso.")
     time.sleep(2)
  
-def buscar_ativo(hostname=None):
-    if not hostname:
-        hostname = input("Digite o hostname ou ID: ")
+def buscar_ativo(termo=None):
+    if not termo:
+        termo = input("Digite o hostname ou ID: ")
  
-    termo_busca = str(hostname).lower()
+    termo = termo.strip()
  
-    for ativo in lista:
-        if ativo.hostname.lower() == termo_busca or str(ativo.id) == termo_busca:
-            print("\n✅ Ativo encontrado.")
+    
+
+    if termo.isdigit():
+        ativo = indice_id.get(int(termo))
+        if ativo:
             return ativo
- 
+
+
+   
+    ativo = indice_hostname.get(termo.lower())
+    if ativo:
+        return ativo
+
+
     return None
+
  
  
 def atualizar_ativo():
@@ -254,6 +292,8 @@ def atualizar_ativo():
         print("\n✅ Ativo atualizado com sucesso.")
     else:
         print("\n⚠️ Ativo não encontrado.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
  
     time.sleep(2)
  
@@ -268,11 +308,17 @@ def remover_ativo():
     ativo = buscar_ativo()
  
     if ativo:
-        lista.remove(ativo)
-        salvar_json()
-        print(f"\n🗑️ Ativo '{ativo.hostname}' removido.")
+        s = input("""Deseja realmente remover esse ativo?(S/N)
+                """)
+        if s.lower() == "s":
+                _desindexar(ativo) 
+                lista.remove(ativo)
+                salvar_json()
+                print(f"\n🗑️ Ativo '{ativo.hostname}' removido.")
     else:
         print("\n⚠️ Ativo não encontrado.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
  
     time.sleep(2)
  
@@ -286,6 +332,8 @@ def escolher_categoria():
         if escolha in Vulnerabilidade.CATEGORIAS:
             return Vulnerabilidade.CATEGORIAS[escolha]
         print("⚠️ Escolha uma opção válida.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
 def adicionar_vulnerabilidade():
     os.system("cls" if os.name == "nt" else "clear")
  
@@ -296,21 +344,22 @@ def adicionar_vulnerabilidade():
     ativo = buscar_ativo()
  
     if ativo:
-        nome = input("\nDigite a vulnerabilidade: ")
-        dificuldade = escolher_dificuldade()
- 
-        categoria = escolher_categoria()  # ✅ salva o resultado
-        vuln = Vulnerabilidade(nome, categoria, dificuldade)  # ✅ usa a categoria
-        ativo.vulnerabilidades.append(vuln)
-        salvar_json()
-        print("\n✅ Vulnerabilidade adicionada.")
-        escolha = input("""Deseja adicionar vulnerabilidade S/N
-                    """)
-        if escolha.lower() == 's':
-                adicionar_vulnerabilidade()
+        while True:
+            nome = input_obrigatorio("Vulnerabilidade")
+            dificuldade = escolher_dificuldade()
+            categoria = escolher_categoria()
+            vuln = Vulnerabilidade(nome, categoria, dificuldade)
+            ativo.vulnerabilidades.append(vuln)
+            salvar_json()
+            print("\n✅ Vulnerabilidade adicionada.")
+        
+            escolha = input("Deseja adicionar outra? S/N: ")
+            if escolha.lower() != 's':
+                break   
     else:
         print("\n⚠️ Ativo não encontrado.")
         time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
     
     
     
@@ -334,6 +383,8 @@ def ver_vulnerabilidades():
             print("\nNenhuma vulnerabilidade cadastrada.")
     else:
         print("\n⚠️ Ativo não encontrado.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
  
     input("\nPressione Enter para voltar...")
  
@@ -351,6 +402,8 @@ def consertar_vulnerabilidade():
         if not ativo.vulnerabilidades:
             print("\nNenhuma vulnerabilidade cadastrada.")
             time.sleep(2)
+            os.system("cls" if os.name == "nt" else "clear")
+            
             return
  
         print()
@@ -374,13 +427,21 @@ def consertar_vulnerabilidade():
                         print(f"\n✅ '{vuln.descricao}' marcada como '{vuln.status}'.")
                 else:
                         print("\n⚠️ Opção inválida.")
+                        time.sleep(2)
+                        os.system("cls" if os.name == "nt" else "clear")
             else:
                 print("\n⚠️ Número inválido.")
+                time.sleep(2)
+                os.system("cls" if os.name == "nt" else "clear")
  
         except ValueError:
             print("\n⚠️ Digite um número válido.")
+            time.sleep(2)
+            os.system("cls" if os.name == "nt" else "clear")
     else:
         print("\n⚠️ Ativo não encontrado.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
  
     time.sleep(2)
  
@@ -394,6 +455,8 @@ def listar_ativos():
  
     if not lista:
         print("\nNenhum ativo cadastrado.")
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
     else:
         for ativo in lista:
             print(ativo)
@@ -403,6 +466,7 @@ def listar_ativos():
  
  
 lista = carregar_json()
+_reindexar()
  
 while True:
     os.system("cls" if os.name == "nt" else "clear")
