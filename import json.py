@@ -488,7 +488,7 @@ Vulnerabilidades-----------------------
 6 - Adicionar vulnerabilidade
 7 - Ver vulnerabilidades
 8 - Consertar vulnerabilidade
--------------------------------------------
+----------------------------------------
 0 - Sair
  
  
@@ -523,16 +523,16 @@ Escolha uma opcao: """))
     elif opcao == 4:
         remover_ativo()
  
-    elif opcao == 5:
+    elif opcao == 6:
         adicionar_vulnerabilidade()
  
-    elif opcao == 6:
+    elif opcao == 7:
         ver_vulnerabilidades()
  
-    elif opcao == 7:
+    elif opcao == 8:
         consertar_vulnerabilidade()
  
-    elif opcao == 8:
+    elif opcao == 5:
         listar_ativos()
  
     else:
