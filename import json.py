@@ -235,7 +235,7 @@ def cadastrar_ativo():
     escolha = input("""Deseja adicionar vulnerabilidade S/N
                     """)
     if escolha.lower() == 's':
-        adicionar_vulnerabilidade()
+        adicionar_vulnerabilidade(ativo)
     else:
          print(f"\n✅ Ativo '{hostname}' cadastrado com sucesso.")
     time.sleep(2)
@@ -334,14 +334,15 @@ def escolher_categoria():
         print("⚠️ Escolha uma opção válida.")
         time.sleep(2)
         os.system("cls" if os.name == "nt" else "clear")
-def adicionar_vulnerabilidade():
+def adicionar_vulnerabilidade(ativo=None):
     os.system("cls" if os.name == "nt" else "clear")
  
     print("=" * 35)
     print(" ADICIONAR VULNERABILIDADE")
     print("=" * 35)
  
-    ativo = buscar_ativo()
+    if not ativo:
+        ativo = buscar_ativo()
  
     if ativo:
         while True:
@@ -477,14 +478,17 @@ while True:
  
     try:
         opcao = int(input("""
+Ativos---------------------------------
 1 - Cadastrar ativo
 2 - Buscar ativo
 3 - Atualizar ativo
 4 - Remover ativo
-5 - Adicionar vulnerabilidade
-6 - Ver vulnerabilidades
-7 - Consertar vulnerabilidade
-8 - Listar ativos
+5 - Listar ativos
+Vulnerabilidades-----------------------
+6 - Adicionar vulnerabilidade
+7 - Ver vulnerabilidades
+8 - Consertar vulnerabilidade
+-------------------------------------------
 0 - Sair
  
  
