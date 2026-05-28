@@ -246,7 +246,10 @@ def buscar_ativo(termo=None):
  
     termo = termo.strip()
  
-    
+    if not termo:
+        print("⚠️ Campo não pode ser vazio.")
+        time.sleep(2)
+        return None
 
     if termo.isdigit():
         ativo = indice_id.get(int(termo))
@@ -259,6 +262,8 @@ def buscar_ativo(termo=None):
     if ativo:
         return ativo
 
+    print("\n⚠️ Ativo não encontrado.")
+    time.sleep(2)
 
     return None
 
@@ -290,11 +295,7 @@ def atualizar_ativo():
  
         salvar_json()
         print("\n✅ Ativo atualizado com sucesso.")
-    else:
-        print("\n⚠️ Ativo não encontrado.")
-        time.sleep(2)
-        os.system("cls" if os.name == "nt" else "clear")
- 
+    
     time.sleep(2)
  
  
@@ -308,18 +309,13 @@ def remover_ativo():
     ativo = buscar_ativo()
  
     if ativo:
-        s = input("""Deseja realmente remover esse ativo?(S/N)
-                """)
+        s = input("Deseja realmente remover esse ativo?(S/N)\n")
         if s.lower() == "s":
-                _desindexar(ativo) 
-                lista.remove(ativo)
-                salvar_json()
-                print(f"\n🗑️ Ativo '{ativo.hostname}' removido.")
-    else:
-        print("\n⚠️ Ativo não encontrado.")
-        time.sleep(2)
-        os.system("cls" if os.name == "nt" else "clear")
- 
+            _desindexar(ativo)
+            lista.remove(ativo)
+            salvar_json()
+            print(f"\n🗑️ Ativo '{ativo.hostname}' removido.")
+
     time.sleep(2)
  
 def escolher_categoria():
@@ -382,11 +378,7 @@ def ver_vulnerabilidades():
                 print(f"  - {v}")
         else:
             print("\nNenhuma vulnerabilidade cadastrada.")
-    else:
-        print("\n⚠️ Ativo não encontrado.")
-        time.sleep(2)
-        os.system("cls" if os.name == "nt" else "clear")
- 
+
     input("\nPressione Enter para voltar...")
  
  
