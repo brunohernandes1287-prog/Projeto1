@@ -2,7 +2,7 @@ import os
 import time
 
 def limpar():
-    print("\033[2J\033[H", end="")
+    os.system("cls" if os.name == "nt" else "clear")
 
 def pausar(segundos=2):
     time.sleep(segundos)
