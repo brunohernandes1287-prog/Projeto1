@@ -6,9 +6,9 @@ import menu as menus
 repo.carregar_json()
 
 def _buscar_e_exibir():
-    ativo = menus.buscar_ativo()
-    if ativo:
-        print(ativo)
+    equipamento = menus.buscar_ativo()
+    if equipamento:
+        print(equipamento)
     input("\nPressione Enter para voltar...")
 
 OPCOES = {
@@ -23,18 +23,17 @@ OPCOES = {
 }
 
 while True:
-    
     os.system("cls" if os.name == "nt" else "clear")
     print("=" * 35)
-    print("   GERENCIADOR DE ATIVOS")
+    print("   GERENCIADOR DE EQUIPAMENTOS")
     print("=" * 35)
     print("""
-Ativos---------------------------------
-1 - Cadastrar ativo
-2 - Buscar ativo
-3 - Atualizar ativo
-4 - Remover ativo
-5 - Listar ativos
+Equipamentos---------------------------
+1 - Cadastrar equipamento
+2 - Buscar equipamento
+3 - Atualizar equipamento
+4 - Remover equipamento
+5 - Listar equipamentos
 Vulnerabilidades-----------------------
 6 - Adicionar vulnerabilidade
 7 - Ver vulnerabilidades

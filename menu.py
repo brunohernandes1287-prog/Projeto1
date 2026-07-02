@@ -1,10 +1,12 @@
 import Repositorio as repo
-from Ativo import Ativo
+from Ativo import criar_equipamento
 from Vulne import Vulnerabilidade
 from Ajudantes import (
     limpar, pausar, input_obrigatorio,
-    escolher_tipo, escolher_dificuldade, escolher_categoria
+    escolher_tipo, escolher_dado_especifico,
+    escolher_dificuldade, escolher_categoria
 )
+
 
 def buscar_ativo(termo=None):
     if not termo:
@@ -15,25 +17,26 @@ def buscar_ativo(termo=None):
         return None
 
     if termo.isdigit():
-        ativo = repo.indice_id.get(int(termo))
-        if ativo:
-            return ativo
+        equipamento = repo.indice_id.get(int(termo))
+        if equipamento:
+            return equipamento
 
-    ativo = repo.indice_hostname.get(termo.lower())
-    if ativo:
-        return ativo
+    equipamento = repo.indice_hostname.get(termo.lower())
+    if equipamento:
+        return equipamento
 
     print("\n⚠️ Ativo não encontrado.")
     pausar()
     return None
 
+
 def cadastrar_ativo():
     limpar()
     print("=" * 35)
-    print("      CADASTRAR ATIVO")
+    print("      CADASTRAR EQUIPAMENTO")
     print("=" * 35)
 
-    id_novo     = max((a.id for a in repo.lista), default=0) + 1
+    id_novo     = max((e.id for e in repo.lista), default=0) + 1
     hostname    = input_obrigatorio("Hostname")
     responsavel = input_obrigatorio("Responsavel")
     setor       = input_obrigatorio("Setor")
@@ -44,77 +47,79 @@ def cadastrar_ativo():
         return
 
     tipo  = escolher_tipo()
-    ativo = Ativo(id_novo, hostname, responsavel, setor, tipo, [])
+    extra = escolher_dado_especifico(tipo)
 
-    repo.lista.append(ativo)
-    repo._indexar(ativo)
+    equipamento = criar_equipamento(tipo, id_novo, hostname, responsavel, setor, extra)
+
+    repo.lista.append(equipamento)
+    repo._indexar(equipamento)
     repo.salvar_json()
-    print(f"\n✅ Ativo cadastrado com ID {id_novo} e Hostname: {hostname}.")
+    print(f"\n✅ Equipamento cadastrado com ID {id_novo} e Hostname: {hostname}.")
     pausar()
     limpar()
     if input("Deseja adicionar vulnerabilidade? S/N: ").lower() == 's':
-        adicionar_vulnerabilidade(ativo)
-    
+        adicionar_vulnerabilidade(equipamento)
+
 
 def atualizar_ativo():
     limpar()
     print("=" * 35)
-    print("      ATUALIZAR ATIVO")
+    print("      ATUALIZAR EQUIPAMENTO")
     print("=" * 35)
 
-    ativo = buscar_ativo()
-    if not ativo:
+    equipamento = buscar_ativo()
+    if not equipamento:
         return
 
-    ativo.responsavel = input(f"Novo Responsavel [{ativo.responsavel}]: ") or ativo.responsavel
-    ativo.setor       = input(f"Novo Setor [{ativo.setor}]: ") or ativo.setor
-
-    if input("\nDeseja alterar o tipo? S/N: ").lower() == 's':
-        ativo.tipo = escolher_tipo()
+    equipamento.responsavel = input(f"Novo Responsavel [{equipamento.responsavel}]: ") or equipamento.responsavel
+    equipamento.setor       = input(f"Novo Setor [{equipamento.setor}]: ") or equipamento.setor
 
     repo.salvar_json()
-    print("\n✅ Ativo atualizado com sucesso.")
+    print("\n✅ Equipamento atualizado com sucesso.")
     pausar()
+
 
 def remover_ativo():
     limpar()
     print("=" * 35)
-    print("       REMOVER ATIVO")
+    print("      REMOVER EQUIPAMENTO")
     print("=" * 35)
 
-    ativo = buscar_ativo()
-    if ativo and input("Confirma remoção? S/N: ").lower() == 's':
-        repo._desindexar(ativo)
-        repo.lista.remove(ativo)
+    equipamento = buscar_ativo()
+    if equipamento and input("Confirma remoção? S/N: ").lower() == 's':
+        repo._desindexar(equipamento)
+        repo.lista.remove(equipamento)
         repo.salvar_json()
-        print(f"\n🗑️ Ativo '{ativo.hostname}' removido.")
+        print(f"\n🗑️ Equipamento '{equipamento.hostname}' removido.")
     pausar()
+
 
 def listar_ativos():
     limpar()
     print("=" * 35)
-    print("       LISTA DE ATIVOS")
+    print("      LISTA DE EQUIPAMENTOS")
     print("=" * 35)
 
     if not repo.lista:
-        print("\nNenhum ativo cadastrado.")
+        print("\nNenhum equipamento cadastrado.")
         pausar()
     else:
-        for ativo in repo.lista:
-            print(ativo)
+        for equipamento in repo.lista:
+            print(equipamento)
             print("-" * 35)
     input("\nPressione Enter para voltar...")
 
-def adicionar_vulnerabilidade(ativo=None):
+
+def adicionar_vulnerabilidade(equipamento=None):
     limpar()
     print("=" * 35)
     print(" ADICIONAR VULNERABILIDADE")
     print("=" * 35)
 
-    if not ativo:
-        ativo = buscar_ativo()
-    if not ativo:
-        print("\n⚠️ Ativo não encontrado.")
+    if not equipamento:
+        equipamento = buscar_ativo()
+    if not equipamento:
+        print("\n⚠️ Equipamento não encontrado.")
         pausar()
         return
 
@@ -123,12 +128,13 @@ def adicionar_vulnerabilidade(ativo=None):
         severidade = escolher_dificuldade()
         categoria  = escolher_categoria()
         vuln       = Vulnerabilidade(nome, categoria, severidade)
-        ativo.vulnerabilidades.append(vuln)
+        equipamento.vulnerabilidades.append(vuln)
         repo.salvar_json()
         print("\n✅ Vulnerabilidade adicionada.")
 
         if input("Deseja adicionar outra? S/N: ").lower() != 's':
             break
+
 
 def ver_vulnerabilidades():
     limpar()
@@ -136,15 +142,16 @@ def ver_vulnerabilidades():
     print("   VER VULNERABILIDADES")
     print("=" * 35)
 
-    ativo = buscar_ativo()
-    if ativo:
-        if ativo.vulnerabilidades:
-            print(f"\n📋 Vulnerabilidades de {ativo.hostname}:\n")
-            for v in ativo.vulnerabilidades:
+    equipamento = buscar_ativo()
+    if equipamento:
+        if equipamento.vulnerabilidades:
+            print(f"\n📋 Vulnerabilidades de {equipamento.hostname}:\n")
+            for v in equipamento.vulnerabilidades:
                 print(f"  - {v}")
         else:
             print("\nNenhuma vulnerabilidade cadastrada.")
     input("\nPressione Enter para voltar...")
+
 
 def consertar_vulnerabilidade():
     limpar()
@@ -152,24 +159,24 @@ def consertar_vulnerabilidade():
     print(" CONSERTAR VULNERABILIDADE")
     print("=" * 35)
 
-    ativo = buscar_ativo()
-    if not ativo:
+    equipamento = buscar_ativo()
+    if not equipamento:
         return
 
-    if not ativo.vulnerabilidades:
+    if not equipamento.vulnerabilidades:
         print("\nNenhuma vulnerabilidade cadastrada.")
         pausar()
         return
 
-    for i, v in enumerate(ativo.vulnerabilidades, 1):
+    for i, v in enumerate(equipamento.vulnerabilidades, 1):
         print(f"\n{i} - {v}")
 
     try:
         escolha = int(input("\nEscolha a vulnerabilidade: "))
-        if not (1 <= escolha <= len(ativo.vulnerabilidades)):
+        if not (1 <= escolha <= len(equipamento.vulnerabilidades)):
             raise ValueError
 
-        vuln = ativo.vulnerabilidades[escolha - 1]
+        vuln = equipamento.vulnerabilidades[escolha - 1]
         print("\nNovo status:")
         for k, v in Vulnerabilidade.STATUS_OPCOES.items():
             print(f"{k} - {v}")

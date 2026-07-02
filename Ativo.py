@@ -1,5 +1,5 @@
 from enum import Enum
-from Vulne import Vulnerabilidade
+
 
 class TipoAtivo(Enum):
     NOTEBOOK         = 1
@@ -11,14 +11,21 @@ class TipoAtivo(Enum):
     IMPRESSORA       = 7
     ESTACAO_TRABALHO = 8
 
-class Ativo:
-    def __init__(self, id, hostname, responsavel, setor, tipo, vulnerabilidades):
+
+class Equipamento:
+    def __init__(self, id, hostname, responsavel, setor, tipo, vulnerabilidades=None):
         self.id               = id
         self.hostname         = hostname
         self.responsavel      = responsavel
         self.setor            = setor
         self.tipo             = tipo
         self.vulnerabilidades = vulnerabilidades if vulnerabilidades is not None else []
+
+    def info_especifica(self):
+        return "Sem informações adicionais"
+
+    def dados_especificos(self):
+        return {}
 
     def to_dict(self):
         return {
@@ -27,7 +34,9 @@ class Ativo:
             "Responsavel": self.responsavel,
             "Setor": self.setor,
             "Tipo": self.tipo.name,
-            "Vulnerabilidades": [v.to_dict() for v in self.vulnerabilidades]
+            "Classe": type(self).__name__,
+            "Vulnerabilidades": [v.to_dict() for v in self.vulnerabilidades],
+            **self.dados_especificos()
         }
 
     def __str__(self):
@@ -44,7 +53,56 @@ class Ativo:
             f"  Hostname    : {self.hostname}\n"
             f"  Responsavel : {self.responsavel}\n"
             f"  Setor       : {self.setor}\n"
-            f"  Tipo        : {self.tipo.name} (código {self.tipo.value})\n"
+            f"  Tipo        : {self.tipo.name} ({type(self).__name__})\n"
+            f"  {self.info_especifica()}\n"
             f"  Vulnerabilidades:{vulns}"
             f"{'=' * 40}"
         )
+
+
+class Notebook(Equipamento):
+    def __init__(self, id, hostname, responsavel, setor, sistema_operacional, vulnerabilidades=None):
+        super().__init__(id, hostname, responsavel, setor, TipoAtivo.NOTEBOOK, vulnerabilidades)
+        self.sistema_operacional = sistema_operacional
+
+    def info_especifica(self):
+        return f"Sistema Operacional: {self.sistema_operacional}"
+
+    def dados_especificos(self):
+        return {"SistemaOperacional": self.sistema_operacional}
+
+
+class Servidor(Equipamento):
+    def __init__(self, id, hostname, responsavel, setor, ip, vulnerabilidades=None):
+        super().__init__(id, hostname, responsavel, setor, TipoAtivo.SERVIDOR, vulnerabilidades)
+        self.ip = ip
+
+    def info_especifica(self):
+        return f"IP: {self.ip}"
+
+    def dados_especificos(self):
+        return {"IP": self.ip}
+
+
+class Impressora(Equipamento):
+    def __init__(self, id, hostname, responsavel, setor, modelo, vulnerabilidades=None):
+        super().__init__(id, hostname, responsavel, setor, TipoAtivo.IMPRESSORA, vulnerabilidades)
+        self.modelo = modelo
+
+    def info_especifica(self):
+        return f"Modelo: {self.modelo}"
+
+    def dados_especificos(self):
+        return {"Modelo": self.modelo}
+
+
+def criar_equipamento(tipo, id, hostname, responsavel, setor, extra=None, vulnerabilidades=None):
+    """Fábrica: decide qual classe instanciar de acordo com o tipo escolhido."""
+    if tipo == TipoAtivo.NOTEBOOK:
+        return Notebook(id, hostname, responsavel, setor, extra, vulnerabilidades)
+    elif tipo == TipoAtivo.SERVIDOR:
+        return Servidor(id, hostname, responsavel, setor, extra, vulnerabilidades)
+    elif tipo == TipoAtivo.IMPRESSORA:
+        return Impressora(id, hostname, responsavel, setor, extra, vulnerabilidades)
+    else:
+        return Equipamento(id, hostname, responsavel, setor, tipo, vulnerabilidades)

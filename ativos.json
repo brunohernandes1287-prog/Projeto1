@@ -1,38 +1,16 @@
 [
     {
         "Id": 1,
-        "Hostname": "Alvin",
-        "Responsavel": "Deivd",
-        "Setor": "Filme",
-        "Tipo": "ESTACAO_TRABALHO",
-        "Vulnerabilidades": [
-            {
-                "descricao": "Internet lenta",
-                "categoria": "Controle de Acesso",
-                "severidade": "Média",
-                "status": "Aberta"
-            }
-        ]
-    },
-    {
-        "Id": 2,
-        "Hostname": "d",
-        "Responsavel": "d",
-        "Setor": "d",
-        "Tipo": "NOTEBOOK",
-        "Vulnerabilidades": []
-    },
-    {
-        "Id": 3,
-        "Hostname": "x",
-        "Responsavel": "x",
-        "Setor": "x",
+        "Hostname": "a",
+        "Responsavel": "a",
+        "Setor": "a",
         "Tipo": "SOFTWARE",
+        "Classe": "Equipamento",
         "Vulnerabilidades": [
             {
-                "descricao": "segredo",
-                "categoria": "Autenticacao",
-                "severidade": "Crítica",
+                "descricao": "lento",
+                "categoria": "Configuração",
+                "severidade": "Média",
                 "status": "Aberta"
             }
         ]
